@@ -5,6 +5,7 @@ from users.models import User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     """Класс для регистрации в админке"""
-    list_display = ('email', 'is_active', 'password', 'avatar', 'phone_number')
-    list_filter = ('email',)
-    search_fields = ('email',)
+
+    list_display = ("email", "is_active", "password", "avatar", "phone_number")
+    list_filter = ("email",)
+    search_fields = ("email",)

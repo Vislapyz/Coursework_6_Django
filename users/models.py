@@ -24,10 +24,7 @@ class User(AbstractUser):
         null=True,
     )
     country = models.CharField(
-        max_length=100,
-        verbose_name="Страна",
-        help_text="Cтрана проживания",
-        **NULLABLE
+        max_length=100, verbose_name="Страна", help_text="Cтрана проживания", **NULLABLE
     )
     email = models.EmailField(
         max_length=100,
