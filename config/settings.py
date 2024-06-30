@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "users",
     "phonenumber_field",
     "main",
+    "django_apscheduler",
 ]
 
 MIDDLEWARE = [
@@ -125,10 +126,22 @@ STATICFILES_DIRS = (BASE_DIR / "static",)
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Нужны для загрузки файлов, фото и т.д.
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = 'users.User'
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "vislapyz@yandex.ru"
+EMAIL_HOST_PASSWORD = "yhqdqhbflgpjktsg"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # секунды
