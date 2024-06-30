@@ -19,7 +19,9 @@ def my_job():
     time_now = timezone.now().date()
     print(time_now)
     newsletters = Newsletter.objects.filter(date_send=time_now)
-    mailings = Newsletter.objects.filter(time_start__gt=time_now).filter(time_finish_lte=['created', 'start'])
+    mailings = Newsletter.objects.filter(time_start__gt=time_now).filter(
+        time_finish_lte=["created", "start"]
+    )
 
     # send_mail("Верификация почты", message, settings.EMAIL_HOST_USER, [user.email])
 
@@ -75,9 +77,7 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        logger.info(
-            "Added weekly job: 'delete_old_job_executions'."
-        )
+        logger.info("Added weekly job: 'delete_old_job_executions'.")
 
         try:
             logger.info("Starting scheduler...")

@@ -1,6 +1,12 @@
 # from django.forms import inlineformset_factory
 from django.urls import reverse_lazy, reverse
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 from main.forms import NewsletterForm, MessageForm, ClientForm
 from main.models import Newsletter, Message, Client
 
