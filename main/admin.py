@@ -27,7 +27,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 class MessageAdmin(admin.ModelAdmin):
     """Регистрации модели Сообщения в админке."""
 
-    list_display = ("subject", "body", "author")
+    list_display = ("id", "subject", "body", "author")
     search_fields = ("subject", "author")
 
 
