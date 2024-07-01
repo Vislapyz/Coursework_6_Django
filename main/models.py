@@ -1,14 +1,13 @@
 from django.db import models
 from django.utils import timezone
 
-# Create your models here.
 from users.models import User
 
 NULLABLE = {"blank": True, "null": True}
 
 
 class Client(models.Model):
-    """Создание модели клиента"""
+    """Класс для создание модели клиента"""
 
     email = models.EmailField(
         verbose_name="email", help_text="Введите Вашу электронную почту"
@@ -26,6 +25,7 @@ class Client(models.Model):
         verbose_name="Пользователь",
         related_name="clients",
         on_delete=models.CASCADE,
+        **NULLABLE,
     )
 
     class Meta:
@@ -37,7 +37,7 @@ class Client(models.Model):
 
 
 class Message(models.Model):
-    """Создания модели Сообщения рассылки"""
+    """Класс для создания модели Сообщения рассылки"""
 
     subject = models.CharField(
         max_length=200, verbose_name="тема письма", help_text="Укажите тему сообщения"
@@ -46,7 +46,11 @@ class Message(models.Model):
         verbose_name="Тело письма", help_text="Заполните тело сообщения"
     )
     author = models.ForeignKey(
-        User, verbose_name="Автор", on_delete=models.CASCADE, related_name="messages"
+        User,
+        verbose_name="Автор",
+        on_delete=models.CASCADE,
+        related_name="messages",
+        **NULLABLE,
     )
 
     class Meta:
@@ -61,7 +65,7 @@ class Message(models.Model):
 
 
 class Newsletter(models.Model):
-    """Создания модели Рассылки"""
+    """Класс для создания модели Рассылки"""
 
     CHOICES_PERIOD = [
         ("daily", "раз в день"),
@@ -85,16 +89,19 @@ class Newsletter(models.Model):
         verbose_name="Автор рассылки",
         related_name="newsletters",
         on_delete=models.CASCADE,
+        **NULLABLE,
     )
     message = models.ForeignKey(
         Message, verbose_name="Сообщение рассылки", on_delete=models.CASCADE
     )
-    date_start = models.DateTimeField(default=timezone.now, verbose_name="Дата начала")
-    date_send = models.DateTimeField(
+    datetime_start = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата начала рассылки"
+    )
+    datetime_send = models.DateTimeField(
         default=timezone.now, verbose_name="Дата отправки"
     )
-    date_finish = models.DateTimeField(
-        default=timezone.now, verbose_name="Дата окончания"
+    datetime_finish = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата окончания рассылки"
     )
     periodicity = models.CharField(
         max_length=50, choices=CHOICES_PERIOD, verbose_name="Периодичность"
@@ -120,7 +127,7 @@ class Newsletter(models.Model):
 
 
 class Log(models.Model):
-    """Создания модели Сообщения"""
+    """Класс для создания модели Сообщения"""
 
     newsletter = models.ForeignKey(
         Newsletter,
@@ -141,4 +148,4 @@ class Log(models.Model):
         verbose_name_plural = "Логи"
 
     def __str__(self):
-        return f"Дата и время последней попытки: {self.last_time_send}, статус попытки: {self.status}"
+        return f"{self.newsletter}. Дата и время последней попытки:{self.last_time_send}, статус попытки:{self.status}"

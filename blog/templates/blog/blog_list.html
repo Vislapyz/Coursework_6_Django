@@ -1,19 +1,15 @@
 {% extends 'main/base.html' %}
-{% block content %}
-<section class="py-5 text-center container">
-    <div class="row py-lg-5">
-        <div class="col-lg-6 col-md-8 mx-auto">
-            <h1 class="fw-dark">Сервис рассылок</h1>
-            <h2>Статистика сервиса</h2>
-            <p class="lead">Количество рассылок всего: {{newsletter_count}}</p>
-            <p class="lead">Количество активных рассылок: {{active_newsletter_count}}</p>
-            <p class="lead">Количество уникальных клиентов: {{ unique_clients_count }}</p>
-        </div>
-    </div>
-    <h2 class="mb-4">Статьи блога</h2>
 
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-8">Публикации</h1>
+    <h2 class="display-6">Сервиса рассылок</h2>
+    <a class="btn btn btn-outline-primary mt-4" href="{% url 'blog:create' %}" role="button">Добавить Публикацию</a>
+</div>
+
+<div class="container">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-        {% for object in article_list %}
+        {% for object in object_list %}
         <div class="col">
             <div class="card shadow-sm">
                 <img src="/media/{{ object.preview }}" alt="Product Image" class="Image fluid">
@@ -29,5 +25,5 @@
         </div>
         {% endfor %}
     </div>
-</section>
+</div>
 {% endblock %}

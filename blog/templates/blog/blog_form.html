@@ -6,17 +6,20 @@
         <div class="col-6">
             <div class="card">
               <div class="card-body">
-                  <form method="post">
+                  <form method="post" enctype="multipart/form-data">
                       {% csrf_token %}
                       {{ form.as_p }}
-                      <p>Удалить Сообщение "{{ object.subject }}?"</p>
-                      <button type="submit" class="btn btn-primary">Подтвердить</button>
-                      <a href="{% url 'main:message_list' %}" class="btn btn-success">Отменить</a>
+                      <button type="submit" class="btn btn-primary">
+                          {% if object %}
+                            Сохранить
+                          {% else %}
+                            Создать
+                          {% endif %}
+                      </button>
                   </form>
               </div>
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}

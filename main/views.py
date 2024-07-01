@@ -1,34 +1,29 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
-from django.views.generic import (
-    ListView,
-    DetailView,
-    CreateView,
-    UpdateView,
-    DeleteView,
-    TemplateView,
-)
-from main.forms import NewsletterForm, MessageForm, ClientForm
-from main.models import Client, Log, Message, Newsletter
+from django.urls import reverse, reverse_lazy
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
+
 from blog.models import Blog
+from main.forms import ClientForm, MessageForm, NewsletterForm
+from main.models import Client, Log, Message, Newsletter
 
 
 class NewsletterListView(ListView):
-    """Отображения всех рассылок"""
+    """Класс для отображения всех рассылок"""
 
     model = Newsletter
 
 
 class NewsletterDetailView(LoginRequiredMixin, DetailView):
-    """Вывода страницы с одной рассылкой по pk"""
+    """Класс для вывода страницы с одной рассылкой по pk"""
 
     model = Newsletter
 
 
 class NewsletterCreateView(LoginRequiredMixin, CreateView):
-    """Создания новой рассылки"""
+    """Класс для создания новой рассылки"""
 
     model = Newsletter
     form_class = NewsletterForm
@@ -36,7 +31,8 @@ class NewsletterCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("main:newsletter_list")
 
     def form_valid(self, form):
-        """Автоматического привязывания Пользователя к создаваемой Рассылке"""
+        """Метод для автоматического привязывания Пользователя к создаваемой Рассылке"""
+        # Сохранение формы
         self.object = form.save()
         self.object.author = self.request.user
         self.object.save()
@@ -45,45 +41,48 @@ class NewsletterCreateView(LoginRequiredMixin, CreateView):
 
 
 class NewsletterUpdateView(LoginRequiredMixin, UpdateView):
-    """Редактирования рассылки"""
+    """Класс для редактирования рассылки"""
 
     model = Newsletter
     form_class = NewsletterForm
 
     def get_success_url(self):
-        """Куда будет совершен переход после редактирования рассылки"""
+        """Метод для определения пути, куда будет совершен переход после редактирования рассылки"""
         return reverse("main:newsletter_detail", args=[self.get_object().pk])
 
     def get_form_class(self):
-        """Выводит правильную форму редактирования"""
+        """
+        Метод, который позволяет вывести Пользователю правильную форму для редактирования,
+        в зависимости от прав доступа Пользователя.
+        """
         user = self.request.user
         if user == self.object.author or self.request.user.is_superuser:
             return NewsletterForm
 
-        raise PermissionDenied("Вы не можете редактировать эту рассылку.")
+        raise PermissionDenied
 
 
 class NewsletterDeleteView(LoginRequiredMixin, DeleteView):
-    """Удаления рассылки"""
+    """Класс для удаления рассылки"""
 
     model = Newsletter
     success_url = reverse_lazy("main:newsletter_list")
 
 
 class MessageListView(ListView):
-    """Отображения всех созданных сообщений"""
+    """Класс для отображения всех созданных сообщений"""
 
     model = Message
 
 
 class MessageDetailView(LoginRequiredMixin, DetailView):
-    """Вывода страницы с одним сообщением по pk"""
+    """Класс для вывода страницы с одним сообщением по pk"""
 
     model = Message
 
 
 class MessageCreateView(LoginRequiredMixin, CreateView):
-    """Создания нового сообщения"""
+    """Класс для создания нового сообщения"""
 
     model = Message
     form_class = MessageForm
@@ -91,46 +90,47 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("main:message_list")
 
     def form_valid(self, form):
-        """Автоматического привязывания Пользователя к создаваемому Сообщению"""
+        """
+        Метод для автоматического привязывания Пользователя к создаваемому Сообщению
+        """
         self.object = form.save()
         self.object.author = self.request.user
         self.object.save()
-
         return super().form_valid(form)
 
 
 class MessageUpdateView(LoginRequiredMixin, UpdateView):
-    """Редактирования сообщения"""
+    """Класс для редактирования сообщения"""
 
     model = Message
     form_class = MessageForm
 
     def get_success_url(self):
-        """Куда будет совершен переход после редактирования рассылки"""
+        """Метод для определения пути, куда будет совершен переход после редактирования сообщения"""
         return reverse("main:message_detail", args=[self.get_object().pk])
 
 
 class MessageDeleteView(LoginRequiredMixin, DeleteView):
-    """Удаления сообщения"""
+    """Класс для удаления сообщения"""
 
     model = Message
     success_url = reverse_lazy("main:message_list")
 
 
 class ClientListView(ListView):
-    """Отображения всех созданных Клиентов"""
+    """Класс для отображения всех созданных Клиентов"""
 
     model = Client
 
 
 class ClientDetailView(LoginRequiredMixin, DetailView):
-    """Вывода страницы с одним Клиентом по pk"""
+    """Класс для вывода страницы с одним Клиентом по pk"""
 
     model = Client
 
 
 class ClientCreateView(LoginRequiredMixin, CreateView):
-    """Создания нового Клиент"""
+    """Класс для создания нового Клиент"""
 
     model = Client
     form_class = ClientForm
@@ -138,42 +138,47 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("main:client_list")
 
     def form_valid(self, form):
-        """Автоматического привязывания Пользователя к создаваемому Клиенту"""
+        """
+        Метод для автоматического привязывания Пользователя к создаваемому Клиенту
+        """
         self.object = form.save()
-        self.object.author = self.request.user
+        self.object.owner = self.request.user
         self.object.save()
-
         return super().form_valid(form)
 
 
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
-    """Редактирования Клиента"""
+    """Класс для редактирования Клиента"""
 
     model = Client
     form_class = ClientForm
 
     def get_success_url(self):
-        """Куда будет совершен переход после редактирования рассылки"""
+        """Метод для определения пути, куда будет совершен переход после редактирования сообщения"""
         return reverse("main:client_detail", args=[self.get_object().pk])
 
 
-class ClientDeleteView(DeleteView):
-    """Удаления Клиента"""
+class ClientDeleteView(LoginRequiredMixin, DeleteView):
+    """Класс для удаления Клиента"""
 
     model = Client
     success_url = reverse_lazy("main:client_list")
 
 
 class IndexView(TemplateView):
-    """Отображение статистики по сайту"""
-    template_name = 'main/index.html'
+    """
+    Класс для отображения главной страницы с показателями статистики по сайту.
+    """
+
+    template_name = "main/index.html"
 
     def get_context_data(self, **kwargs):
-        """Отображение статистики на Главной странице"""
-
+        """
+        Метод получения данных для отображения в виде статистики на Главной странице Проекта.
+        """
         context = super().get_context_data(**kwargs)
-        article_list = Blog.object.all()[:3]
-        context['article_list'] = article_list
+        article_list = Blog.objects.all()[:3]
+        context["article_list"] = article_list
         newsletter_count = Newsletter.objects.all().count()
         context["newsletter_count"] = newsletter_count
 
@@ -186,12 +191,16 @@ class IndexView(TemplateView):
 
 
 class LogListView(ListView):
-    """Отображения всех созданных Логов."""
+    """
+    Класс для отображения всех созданных Логов.
+    """
 
     model = Log
 
     def get_queryset(self, *args, **kwargs):
-        """Вывода листа с Логами только для Автора рассылок"""
+        """
+        Метод для вывода листа с Логами только для Автора рассылок, при отправке которых эти Логи сформированы.
+        """
         user = self.request.user
         if user.is_staff or user.is_superuser:
             queryset = super().get_queryset(*args, **kwargs)

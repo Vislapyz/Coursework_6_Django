@@ -1,5 +1,4 @@
 {% extends 'main/base.html' %}
-
 {% block content %}
 <div class="container">
     <div class="row">
@@ -9,9 +8,9 @@
                   <form method="post">
                       {% csrf_token %}
                       {{ form.as_p }}
-                      <p>Удалить Сообщение "{{ object.subject }}?"</p>
+                      <p>Вы хотите удалить Публикацию "{{ object.title }}?"</p>
                       <button type="submit" class="btn btn-primary">Подтвердить</button>
-                      <a href="{% url 'main:message_list' %}" class="btn btn-success">Отменить</a>
+                      <a href="{% url 'blog:list' %}" class="btn btn-success">Отменить</a>
                   </form>
               </div>
             </div>

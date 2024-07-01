@@ -9,15 +9,20 @@ from main.models import Log, Newsletter
 
 
 def change_newsletter_status(newsletter, current_datetime) -> None:
-    """Функция меняющая статус подписки."""
+    """
+    Функция меняющая статус подписки.
+    Данна функция будет работать внутри функции send_mail_by_time.
+    Она проверяет статус рассылки и при необходимости, когда статус рассылки="завершен", меняет актуальности с
+    is_active=True на is_active=False
+    """
     if newsletter.status == "created":
         newsletter.status = "launched"
         print(f"{newsletter.title} launched")
     elif newsletter.status == "launched":
         print(f"{newsletter.title}launched")
     elif (
-            newsletter.status == "launched"
-            and newsletter.datetime_finish <= current_datetime
+        newsletter.status == "launched"
+        and newsletter.datetime_finish <= current_datetime
     ):
         newsletter.status = "completed"
         newsletter.is_active = False
@@ -27,7 +32,7 @@ def change_newsletter_status(newsletter, current_datetime) -> None:
 
 def get_date_send(newsletter, current_datetime):
     """
-    Корректировки даты и времени для следующей отправки рассылки (datetime_send).
+    Функция корректировки  даты и временм для следующей отправки рассылки (datetime_send).
     """
     if newsletter.datetime_send < current_datetime:
         if newsletter.periodicity == "daily":
@@ -40,6 +45,13 @@ def get_date_send(newsletter, current_datetime):
 
 
 def send_mail_by_time():
+    """
+    Отправка письма по времени, указанному в подписке на рассылку.
+    1) Выбираются все актуальные рассылки (is_active=True)
+    2) Проверяется статус каждой рассылки функцией и соответствие условиям отправки
+    3) Формирует emails_list и отправляет письма, сохраняет Лог с информацией об отпрвке
+    4) При ошибке отправке формирует лог с этой ошибкой
+    """
     zone = pytz.timezone(settings.TIME_ZONE)
     current_datetime = datetime.now(zone)
     newsletter_list = Newsletter.objects.all().filter(is_active=True)
@@ -47,9 +59,9 @@ def send_mail_by_time():
         for newsletter in newsletter_list:
             change_newsletter_status(newsletter, current_datetime)
             if (
-                    newsletter.datetime_send
-                    <= current_datetime
-                    <= newsletter.datetime_finish
+                newsletter.datetime_send
+                <= current_datetime
+                <= newsletter.datetime_finish
             ):
                 emails_list = [client.email for client in newsletter.clients.all()]
 
