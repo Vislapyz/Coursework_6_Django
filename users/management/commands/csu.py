@@ -15,4 +15,4 @@ class Command(BaseCommand):
         user.set_password("123qwe")
         user.save()
 
-        print(f"Создание superuser  прошло успешно: {user.email} пароль: 123qwe")
+        # print(f"Создание superuser  прошло успешно: {user.email} пароль: 123qwe")

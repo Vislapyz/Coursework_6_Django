@@ -21,6 +21,7 @@ class NewsletterAdmin(admin.ModelAdmin):
         "title",
         "author",
         "date_start",
+        "data_send"
         "date_finish",
         "periodicity",
         "status",

@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.decorators.cache import cache_page
 
 from main.apps import MainConfig
 from main.views import (
@@ -17,11 +18,15 @@ from main.views import (
     ClientCreateView,
     ClientUpdateView,
     ClientDeleteView,
+    IndexView,
+    LogListView,
+    toggle_activity,
 )
 
 app_name = MainConfig.name
 
 urlpatterns = [
+    path("", cache_page(60)(IndexView.as_view()), name="index"),
     path("newsletters/", NewsletterListView.as_view(), name="newsletter_list"),
     path(
         "newsletters/<int:pk>/",
@@ -55,4 +60,7 @@ urlpatterns = [
     path("clients/create/", ClientCreateView.as_view(), name="client_create"),
     path("clients/<int:pk>/update/", ClientUpdateView.as_view(), name="client_update"),
     path("clients/<int:pk>/delete/", ClientDeleteView.as_view(), name="client_delete"),
+    path("logs/", LogListView.as_view(), name="logs_list"),
+    path("activity/<int:pk>/", toggle_activity, name="toggle_activity"),
+
 ]

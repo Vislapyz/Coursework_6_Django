@@ -33,7 +33,7 @@ class Client(models.Model):
         verbose_name_plural = "Клиенты"
 
     def __str__(self):
-        return f"Клиент сервиса: {self.name}, email: {self.email}"
+        return f"Клиент сервиса: {self.name}"
 
 
 class Message(models.Model):
@@ -52,9 +52,12 @@ class Message(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+        permissions = [
+            ("set_update", "Может менять сообщения"),
+        ]
 
     def __str__(self):
-        return f"Заголовок сообщения: {self.subject}"
+        return f"Тема: {self.subject}. содержание: {self.body}"
 
 
 class Newsletter(models.Model):
@@ -88,7 +91,7 @@ class Newsletter(models.Model):
     )
     date_start = models.DateTimeField(default=timezone.now, verbose_name="Дата начала")
     date_send = models.DateTimeField(
-        default=timezone.now, verbose_name="Дата следующей отправки"
+        default=timezone.now, verbose_name="Дата отправки"
     )
     date_finish = models.DateTimeField(
         default=timezone.now, verbose_name="Дата окончания"
@@ -108,6 +111,9 @@ class Newsletter(models.Model):
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+        permissions = [
+            ("set_is_active", "Может менять активность рассылки"),
+        ]
 
     def __str__(self):
         return f"Рассылка {self.title}"
@@ -127,6 +133,8 @@ class Log(models.Model):
     )
     status = models.CharField(max_length=50, verbose_name="Статус попытки")
     server_response = models.TextField(verbose_name="Ответ сервера", **NULLABLE)
+
+    owner = models.ForeignKey(User, verbose_name="Владелец Логов", on_delete=models.CASCADE, **NULLABLE)
 
     class Meta:
         verbose_name = "Лог"

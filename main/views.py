@@ -1,4 +1,6 @@
-# from django.forms import inlineformset_factory
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -6,9 +8,11 @@ from django.views.generic import (
     CreateView,
     UpdateView,
     DeleteView,
+    TemplateView,
 )
 from main.forms import NewsletterForm, MessageForm, ClientForm
-from main.models import Newsletter, Message, Client
+from main.models import Client, Log, Message, Newsletter
+from blog.models import Blog
 
 
 class NewsletterListView(ListView):
@@ -17,13 +21,13 @@ class NewsletterListView(ListView):
     model = Newsletter
 
 
-class NewsletterDetailView(DetailView):
+class NewsletterDetailView(LoginRequiredMixin, DetailView):
     """Вывода страницы с одной рассылкой по pk"""
 
     model = Newsletter
 
 
-class NewsletterCreateView(CreateView):
+class NewsletterCreateView(LoginRequiredMixin, CreateView):
     """Создания новой рассылки"""
 
     model = Newsletter
@@ -31,28 +35,35 @@ class NewsletterCreateView(CreateView):
 
     success_url = reverse_lazy("main:newsletter_list")
 
-    # def form_valid(self, form):
-    #     """Метод для автоматического привязывания Пользователя к создаваемой Рассылке"""
-    #     # Сохранение формы
-    #     self.object = form.save()
-    #     self.object.author = self.request.user
-    #     self.object.save()
-    #
-    #     return super().form_valid(form)
+    def form_valid(self, form):
+        """Автоматического привязывания Пользователя к создаваемой Рассылке"""
+        self.object = form.save()
+        self.object.author = self.request.user
+        self.object.save()
+
+        return super().form_valid(form)
 
 
-class NewsletterUpdateView(UpdateView):
+class NewsletterUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирования рассылки"""
 
     model = Newsletter
     form_class = NewsletterForm
 
     def get_success_url(self):
-        """Метод для определения пути, куда будет совершен переход после редактирования рассылки"""
+        """Куда будет совершен переход после редактирования рассылки"""
         return reverse("main:newsletter_detail", args=[self.get_object().pk])
 
+    def get_form_class(self):
+        """Выводит правильную форму редактирования"""
+        user = self.request.user
+        if user == self.object.author or self.request.user.is_superuser:
+            return NewsletterForm
 
-class NewsletterDeleteView(DeleteView):
+        raise PermissionDenied("Вы не можете редактировать эту рассылку.")
+
+
+class NewsletterDeleteView(LoginRequiredMixin, DeleteView):
     """Удаления рассылки"""
 
     model = Newsletter
@@ -65,13 +76,13 @@ class MessageListView(ListView):
     model = Message
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, DetailView):
     """Вывода страницы с одним сообщением по pk"""
 
     model = Message
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     """Создания нового сообщения"""
 
     model = Message
@@ -79,19 +90,27 @@ class MessageCreateView(CreateView):
 
     success_url = reverse_lazy("main:message_list")
 
+    def form_valid(self, form):
+        """Автоматического привязывания Пользователя к создаваемому Сообщению"""
+        self.object = form.save()
+        self.object.author = self.request.user
+        self.object.save()
 
-class MessageUpdateView(UpdateView):
+        return super().form_valid(form)
+
+
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирования сообщения"""
 
     model = Message
     form_class = MessageForm
 
     def get_success_url(self):
-        """Метод куда будет совершен переход после редактирования сообщения"""
+        """Куда будет совершен переход после редактирования рассылки"""
         return reverse("main:message_detail", args=[self.get_object().pk])
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     """Удаления сообщения"""
 
     model = Message
@@ -104,13 +123,13 @@ class ClientListView(ListView):
     model = Client
 
 
-class ClientDetailView(DetailView):
+class ClientDetailView(LoginRequiredMixin, DetailView):
     """Вывода страницы с одним Клиентом по pk"""
 
     model = Client
 
 
-class ClientCreateView(CreateView):
+class ClientCreateView(LoginRequiredMixin, CreateView):
     """Создания нового Клиент"""
 
     model = Client
@@ -118,15 +137,23 @@ class ClientCreateView(CreateView):
 
     success_url = reverse_lazy("main:client_list")
 
+    def form_valid(self, form):
+        """Автоматического привязывания Пользователя к создаваемому Клиенту"""
+        self.object = form.save()
+        self.object.author = self.request.user
+        self.object.save()
 
-class ClientUpdateView(UpdateView):
+        return super().form_valid(form)
+
+
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирования Клиента"""
 
     model = Client
     form_class = ClientForm
 
     def get_success_url(self):
-        """Метод куда будет совершен переход после редактирования сообщения"""
+        """Куда будет совершен переход после редактирования рассылки"""
         return reverse("main:client_detail", args=[self.get_object().pk])
 
 
@@ -135,3 +162,54 @@ class ClientDeleteView(DeleteView):
 
     model = Client
     success_url = reverse_lazy("main:client_list")
+
+
+class IndexView(TemplateView):
+    """Отображение статистики по сайту"""
+    template_name = 'main/index.html'
+
+    def get_context_data(self, **kwargs):
+        """Отображение статистики на Главной странице"""
+
+        context = super().get_context_data(**kwargs)
+        article_list = Blog.object.all()[:3]
+        context['article_list'] = article_list
+        newsletter_count = Newsletter.objects.all().count()
+        context["newsletter_count"] = newsletter_count
+
+        unique_clients_count = Client.objects.all().values("email").distinct().count()
+        context["unique_clients_count"] = unique_clients_count
+
+        active_newsletter_count = Newsletter.objects.filter(is_active=True).count()
+        context["active_newsletter_count"] = active_newsletter_count
+        return context
+
+
+class LogListView(ListView):
+    """Отображения всех созданных Логов."""
+
+    model = Log
+
+    def get_queryset(self, *args, **kwargs):
+        """Вывода листа с Логами только для Автора рассылок"""
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            queryset = super().get_queryset(*args, **kwargs)
+        else:
+            queryset = super().get_queryset().filter(owner=user)
+        return queryset
+
+
+def toggle_activity(request, pk):
+    """
+    Функция для Модератора по смене активности рассылки.
+    """
+    newsletter_status = get_object_or_404(Newsletter, pk=pk)
+    if newsletter_status.is_active is True:
+        newsletter_status.is_active = False
+
+    elif newsletter_status.is_active is False:
+        newsletter_status.is_active = True
+
+    newsletter_status.save()
+    return redirect(reverse("main:newsletter_list"))

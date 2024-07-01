@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "users",
     "phonenumber_field",
     "main",
+    "blog",
     "django_apscheduler",
 ]
 
@@ -145,3 +146,14 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # секунды
+
+CACHE_ENABLED = True
+
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://127.0.0.1:6379",
+        }
+    }
+

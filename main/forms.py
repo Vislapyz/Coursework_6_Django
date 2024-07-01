@@ -1,4 +1,4 @@
-from django.forms import ModelForm, BooleanField
+from django.forms import ModelForm, BooleanField, DateTimeInput
 
 from main.models import Newsletter, Message, Client
 
@@ -20,7 +20,16 @@ class NewsletterForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Newsletter
-        exclude = ("next_date", "is_active")
+        exclude = ("datatime_send", "author")
+
+        widgets = {
+            "datetime_start": DateTimeInput(
+                attrs={"placeholder": "ДД.ММ.ГГГГ ЧЧ:ММ:СС", "type": "datetime-local"}
+            ),
+            "datetime_finish": DateTimeInput(
+                attrs={"placeholder": "ДД.ММ.ГГГГ ЧЧ:ММ:СС", "type": "datetime-local"}
+            ),
+        }
 
 
 class MessageForm(StyleFormMixin, ModelForm):
@@ -28,7 +37,7 @@ class MessageForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Message
-        fields = ("subject", "body", "author")
+        fields = ("subject", "body")
 
 
 class ClientForm(StyleFormMixin, ModelForm):
@@ -36,4 +45,4 @@ class ClientForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Client
-        fields = ("email", "name", "owner")
+        fields = ("email", "name")
